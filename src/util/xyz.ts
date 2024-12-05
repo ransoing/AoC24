@@ -6,20 +6,19 @@ export interface IFloodFillOptions {
     /**
      * A function to get the neighbors of this point.
      * Typically you would call `p.neighbors()` or `p.neighbors3D()`
-     * @default p => p.neighbors()
+     * @default p => p.neighbors() (gets orthogonal 2D neighbors)
      */
     getNeighbors?: (p: XYZ) => XYZ[];
     /**
-     * Determines whether a neighbor point can be visited, determined by if the neighbor's key as defined by getVisitedKey is already in the
-     * list of visited point keys. This is in addition to normal checks of whether the point has already been visited by another traveler,
-     * by a path that has less weight
+     * Determines whether a neighbor point can be visited. This is in addition to standard checks of whether the point has already been
+     * visited by another "traveler" in the flood fill algorithm.
+     * If left to the default, the flood fill will search an infinitely large grid.
      * 
      * @default () => true
      */
     canVisitNeighbor?: (neighbor: XYZ, p: XYZ) => boolean;
     /**
-     * Performs some action on every point before it's visited. Is called using the point to be visited, the iteration after visiting the
-     * point, and the path the traveler has taken
+     * Performs some action on every point before it's added to the list of visited points. It is called using the point to be visited.
      * @default () => {}
      */
     tap?: (p: XYZ) => void;
@@ -39,8 +38,9 @@ export interface IPathfindingOptions {
      */
     getNeighbors?: (p: XYZ, history?: IPathHistoryItem[]) => XYZ[];
     /**
-     * Determines whether a neighbor point can be visited. If left to the default, the BFS search will search an infinitely large grid.
-     * This is called in addition to `canRevisitPoint` to determine if the BFS search can move to a point.
+     * Determines whether a neighbor point can be visited. If left to the default, the BFS will search an infinitely large grid.
+     * This is called in addition to standard checks of whether the point has already been visited (by a path with equal or lesser weight)
+     * to determine if the BFS can move to a point.
      * The point in the last item in the `history` array is the same as the `from` point.
      * 
      * @default () => true
@@ -49,9 +49,9 @@ export interface IPathfindingOptions {
     /** 
      * Warning: setting this to anything but 0 can greatly slow down the algorithm!
      * `fudgeFactor` is only needed if the key returned by `getStateKey` doesn't represent a unique state!
-     * A positive number that allows a path to visit a spot it's been before, or to visit a spot that another path has been to but more
-     * efficiently, within a certain allowable range. This is needed when one path reaching a spot quicker doesn't necessarily imply that
-     * it will reach the target point faster. (for example if there are restrictions on allowable movement based on past movement).
+     * This is a positive number that allows a path to visit a spot it's been before, or to visit a spot that another path has been to but
+     * more efficiently, within a certain allowable range. This is needed when one path reaching a spot quicker doesn't necessarily imply
+     * that it will reach the target point faster. (for example if there are restrictions on allowable movement based on past movement).
      * Higher numbers allow more overlap between different paths but will greatly slow down the algorithm. Set the number based on the
      * weight of points. If the average weight is 10 and you set this number to 100, the algorithm will be very slow and allow much overlap.
      * If the average weight is 10 and you set it to 10, it will only allow a small amount of overlap in paths.
@@ -60,7 +60,7 @@ export interface IPathfindingOptions {
     fudgeFactor?: number;
     /**
      * Performs some action on every point before it's visited. Is called using the point to be visited and the path the traveler has taken.
-     * The point in the last item in the `history` array is the same as the `from` point.
+     * The point in the last item in the `history` array is the same as the `p` point.
      * @default () => {}
      */
     tap?: (p: XYZ, history?: IPathHistoryItem[]) => void;
@@ -75,13 +75,13 @@ export interface IPathfindingOptions {
      */
     getStateKey?: (p: XYZ, history?: IPathHistoryItem[]) => string;
     /**
-     * Gets the "weight" i.e. cost, to travel to a point. Higher weights are considered to be "worse".
+     * Gets the "weight" i.e. cost, to travel from one point to a neighboring point. Higher weights are considered to be "worse".
      * Default: p => 1
      */
     getPointWeight?: (to: XYZ, from?: XYZ) => number;
     /**
-     * An estimated average weight it takes to travel from any one point to another. Used to help stop paths early when one path has gotten
-     * to the finish point. Conservative lower numbers will produce a more accurate end result but run slower.
+     * An estimated average weight it takes to travel from any one point to a neighboring point. Used to help stop paths early when one path
+     * has gotten to the finish point. Conservative lower numbers will produce a more accurate end result but run slower.
      * Another way to think about this is: given a path that has gotten halfway, what's the lowest possible additional weight it could
      * accumulate on the way to the finish?
      * Default: 1
@@ -126,10 +126,19 @@ export class XYZ {
     static orthogonalDirections2D = [ [1,0], [0,1], [-1,0], [0,-1] ];
     static diagonalDirections2D = [ [1,1], [1,-1], [-1,-1], [-1,1] ];
     static orthogonalDirections3D = [ [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1] ];
-    static diagonalDirections3D = [
-        [1,1,1],  [1,-1,1],  [-1,-1,1],  [-1,1,1],
-        [1,1,0],  [1,-1,0],  [-1,-1,0],  [-1,1,0],
-        [1,1,-1], [1,-1,-1], [-1,-1,-1], [-1,1,-1]
+    /** diagonal directions for which the vector stays on either the XY, XZ, or YZ plane */
+    static diagonalDirectionsOnPlanes3D = [
+        [1,1,0], [1,-1,0], [-1,-1,0], [-1,1,0],
+        [1,0,1], [1,0,-1], [-1,0,-1], [-1,0,1],
+        [0,1,1], [0,1,-1], [0,-1,-1], [0,-1,1]
+    ];
+    /**
+     * diagonal directions which all have motion in each of the X, Y, and Z coordinates.
+     * In other words, vectors pointing out of the corners of a cube
+     */
+    static trueDiagonalDirections3D = [
+        [1,1,1],  [1,1,-1],  [1,-1,1],  [1,-1,-1],
+        [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
     ];
     /** directions organized in clockwise direction for a grid where positive y is down */
     static clockwiseDirectionsYDown = [ [0,-1], [1,0], [0,1], [-1,0] ];
@@ -241,7 +250,9 @@ export class XYZ {
 
     /** Returns all neighbors in 3 dimensions */
     neighbors3D( includeDiagonal = false ): XYZ[] {
-        return XYZ.orthogonalDirections3D.concat( includeDiagonal ? XYZ.diagonalDirections3D : [] ).map( c => this.plus(c) );
+        return XYZ.orthogonalDirections3D.concat(
+            includeDiagonal ? [...XYZ.diagonalDirectionsOnPlanes3D, ...XYZ.trueDiagonalDirections3D] : []
+        ).map( c => this.plus(c) );
     }
 
     /** Returns the absolute straight-line distance from one point to another */
@@ -272,6 +283,7 @@ export class XYZ {
     /**
      * Performs a "flood fill" using breadth-first search starting at the point the method is called on.
      * Flood fill is used to find all points accessible from the starting point.
+     * Returns an array of all points visited, including the starting and ending points.
     */
     floodFill( options: IFloodFillOptions ): IFloodFillResult {
         const defaultOptions: IFloodFillOptions = {
@@ -288,7 +300,7 @@ export class XYZ {
         while ( queue.length > 0 ) {
             current = queue.pop();
             o.getNeighbors( current ).filter(
-                n => o.canVisitNeighbor( n, current ) && !visitedPoints.has( n.toString() )
+                n => !visitedPoints.has( n.toString() ) && o.canVisitNeighbor( n, current )
             ).forEach( n => {
                 o.tap( n );
                 visitedPoints.add( n.toString() );
@@ -301,7 +313,7 @@ export class XYZ {
     }
 
     /**
-     * Uses a breadh-first search to find the quickest path from the point the method is called to a target point.
+     * Uses a breadth-first search to find the quickest path from the point the method is called to a target point.
      * If point weights are not set, this returns the shortest path.
      * Returns the path to the target point and the total weight to get there.
      * Avoids revisiting points that have previously been visited with equal or lower total weights on the path to that given point.

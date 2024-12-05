@@ -8,3 +8,8 @@ export function readTextFile( path: string ) {
 export function parseIntegers( str: string ): number[] {
     return [ ...str.matchAll( /-?\d+/g ) ].map( match => parseInt(match[0]) );
 }
+
+/** returns an array of numbers potentially with decimals (possibly negative ones), found in a string, parsed as floats */
+export function parseFloats( str: string ): number[] {
+    return [ ...str.matchAll( /-?\d+(\.\d+)?/g ) ].map( match => parseFloat(match[0]) );
+}

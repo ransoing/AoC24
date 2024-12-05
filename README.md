@@ -10,6 +10,8 @@ Run with `npm run solve [day number]`, i.e. `npm run solve 1` for day 1's puzzle
 
 If the `solve` script doesn't work, use `npm run solveAlt -- src/day1/solution.ts`, or substitute the number for any number from 1-25.
 
+Before running the solution for any day's puzzle, you'll need to copy your puzzle input into a new file named `full-input`, placed in that day's directory.
+
 ## General tips
 
 To work with 2D or 3D grids, use the `XYZ` utility in this repo.

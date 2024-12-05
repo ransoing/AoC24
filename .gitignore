@@ -1,5 +1,7 @@
 # AoC inputs (they don't want their puzzle inputs to be committed)
 full-input
+full-input2
+full-input-2
 # but don't ignore the example file.
 !src/dayx/full-input
 

@@ -117,21 +117,21 @@ interface IBfsQueueItem {
 /** A class that gives convenient tools for dealing with 2D or 3D coordinates */
 export class XYZ {
 
-    static xPositive = [ 1, 0, 0 ];
-    static xNegative = [ -1, 0, 0 ];
-    static yPositive = [ 0, 1, 0 ];
-    static yNegative = [ 0, -1, 0 ];
-    static zPositive = [ 0, 0, 1 ];
-    static zNegative = [ 0, 0, -1 ];
-    static orthogonalDirections2D = [ [1,0], [0,1], [-1,0], [0,-1] ];
-    static diagonalDirections2D = [ [1,1], [1,-1], [-1,-1], [-1,1] ];
-    static orthogonalDirections3D = [ [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1] ];
+    static xPositive = new XYZ([ 1, 0, 0 ]);
+    static xNegative = new XYZ([ -1, 0, 0 ]);
+    static yPositive = new XYZ([ 0, 1, 0 ]);
+    static yNegative = new XYZ([ 0, -1, 0 ]);
+    static zPositive = new XYZ([ 0, 0, 1 ]);
+    static zNegative = new XYZ([ 0, 0, -1 ]);
+    static orthogonalDirections2D = [ [1,0], [0,1], [-1,0], [0,-1] ].map( c => new XYZ(c) );
+    static diagonalDirections2D = [ [1,1], [1,-1], [-1,-1], [-1,1] ].map( c => new XYZ(c) );
+    static orthogonalDirections3D = [ [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1] ].map( c => new XYZ(c) );
     /** diagonal directions for which the vector stays on either the XY, XZ, or YZ plane */
     static diagonalDirectionsOnPlanes3D = [
         [1,1,0], [1,-1,0], [-1,-1,0], [-1,1,0],
         [1,0,1], [1,0,-1], [-1,0,-1], [-1,0,1],
         [0,1,1], [0,1,-1], [0,-1,-1], [0,-1,1]
-    ];
+    ].map( c => new XYZ(c) );
     /**
      * diagonal directions which all have motion in each of the X, Y, and Z coordinates.
      * In other words, vectors pointing out of the corners of a cube
@@ -139,11 +139,11 @@ export class XYZ {
     static trueDiagonalDirections3D = [
         [1,1,1],  [1,1,-1],  [1,-1,1],  [1,-1,-1],
         [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]
-    ];
-    /** directions organized in clockwise direction for a grid where positive y is down */
-    static clockwiseDirectionsYDown = [ [0,-1], [1,0], [0,1], [-1,0] ];
-    /** directions organized in clockwise direction for a grid where positive y is up */
-    static clockwiseDirectionsYUp = [ [0,1], [1,0], [0,-1], [-1,0] ];
+    ].map( c => new XYZ(c) );
+    /** directions organized in clockwise direction for a grid where positive y is up and positive x is right */
+    static clockwiseDirections = [ [0,1], [1,0], [0,-1], [-1,0] ].map( c => new XYZ(c) );
+    /** directions organized in counterclockwise direction for a grid where positive y is up and positive x is right */
+    static counterClockwiseDirections = [ [0,1], [-1,0], [0,-1], [1,0] ].map( c => new XYZ(c) );
 
     /** Takes either an XYZ or number[] and converts it to XYZ */
     static normalize( c: Coordinate ): XYZ {
@@ -243,6 +243,64 @@ export class XYZ {
         return xyz != null && this.x === xyz.x && this.y === xyz.y && this.z === xyz.z;
     }
 
+    /** Returns whether the coordinates of the XYZ object and another are the same */
+    equals( c: Coordinate ): boolean {
+        return this.eq( c );
+    }
+
+    /**
+     * rotates the XYZ as a vector clockwise and returns a new XYZ, from a point of view of a higher z-value looking down on the XY plane.
+     * Rotates on an XY-plane (keeps the same Z-value)
+     */
+    rotatedClockwise(): XYZ {
+        return new XYZ([ this.y, -this.x, this.z ]);
+    }
+
+    /**
+     * rotates the XYZ as a vector counterclockwise and returns a new XYZ, from a point of view of a higher z-value looking down on the XY plane.
+     * Rotates on a XY-plane (keeps the same Z-value)
+     */
+    rotatedCounterClockwise(): XYZ {
+        return new XYZ([ -this.y, this.x, this.z ]);
+    }
+
+    /** alias of `rotatedClockwise` */
+    rotatedClockwiseXY = this.rotatedClockwise;
+    /** alias of `rotatedCounterClockwise` */
+    rotatedCounterClockwiseXY = this.rotatedCounterClockwise;
+
+    /**
+     * rotates the XYZ as a vector clockwise and returns a new XYZ, from a point of view of a higher y-value looking down on the XZ plane.
+     * Rotates on an XZ-plane (keeps the same Y-value)
+     */
+    rotatedClockwiseXZ(): XYZ {
+        return new XYZ([ -this.z, this.y, this.x ]);
+    }
+
+    /**
+     * rotates the XYZ as a vector counterclockwise and returns a new XYZ, from a point of view of a higher y-value looking down on the XZ plane.
+     * Rotates on an XZ-plane (keeps the same Y-value)
+     */
+    rotatedCounterClockwiseXZ(): XYZ {
+        return new XYZ([ this.z, this.y, -this.x ]);
+    }
+
+    /**
+     * rotates the XYZ as a vector clockwise and returns a new XYZ, from a point of view of a higher x-value looking down on the YZ plane.
+     * Rotates on a YZ-plane (keeps the same X-value)
+     */
+    rotatedClockwiseYZ(): XYZ {
+        return new XYZ([ this.x, this.z, -this.y ]);
+    }
+
+    /**
+     * rotates the XYZ as a vector counterclockwise and returns a new XYZ, from a point of view of a higher x-value looking down on the YZ plane.
+     * Rotates on a YZ-plane (keeps the same X-value)
+     */
+    rotatedCounterClockwiseYZ(): XYZ {
+        return new XYZ([ this.x, -this.z, this.y ]);
+    }
+
     /** Returns all neighbors in the same z plane */
     neighbors( includeDiagonal = false ): XYZ[] {
         return XYZ.orthogonalDirections2D.concat( includeDiagonal ? XYZ.diagonalDirections2D : [] ).map( c => this.plus(c) );
@@ -268,12 +326,19 @@ export class XYZ {
         return Math.abs( this.x - xyz.x ) + Math.abs( this.y - xyz.y ) + Math.abs( this.z - xyz.z );
     }
 
-    /** given a 2D or 3D array, returns the value at [y][x][z] in that array */
+    /** given a 2D or 3D array, returns the value at [x][y][z] in that array */
     valueIn<T>( arr: T[][] ): T;
     valueIn<T>( arr: T[][][] ): T;
     valueIn<T>( arr: (T | T[])[][] ) {
-        const element2d = arr[this.y]?.[this.x];
+        const element2d = arr[this.x]?.[this.y];
         return Array.isArray( element2d ) ? element2d?.[this.z] : element2d;
+    }
+
+    /** given a 2D or 3D array, sets the value at [x][y][z] in that array */
+    setValueIn<T>( arr: T[][], newValue: T ): void;
+    setValueIn<T>( arr: T[][][], newValue: T ): void;
+    setValueIn<T>( arr: (T | T[])[][], newValue: T ): void {
+        Array.isArray( arr[this.x][this.y] ) ? arr[this.x][this.y][this.z] = newValue : arr[this.x][this.y] = newValue;
     }
 
     toString(): string {

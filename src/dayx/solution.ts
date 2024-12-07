@@ -1,7 +1,7 @@
 import { sum } from 'lodash';
 import { isPointInPolygon } from 'geolib';
 import { outputAnswers } from '../output-answers';
-import { parseAsYxGrid } from '../util/grid';
+import { parseAsXyGrid } from '../util/grid';
 import { product } from '../util/math';
 import { countDiffs } from '../util/misc';
 import { readTextFile } from '../util/parse';
@@ -15,7 +15,7 @@ function solve( input: string ) {
     // const blocks = input.split( '\n\n' ).map( block => block.split('\n') );
     // const steps = input.split( '\n' ).map( line => line.split(',') );
     // const lines = input.split( '\n' );
-    // const grid = parseAsYxGrid( input );
+    // const grid = parseAsXyGrid( input );
 }
 
 outputAnswers(

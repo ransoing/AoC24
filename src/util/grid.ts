@@ -1,8 +1,40 @@
-import { identity, unzip } from 'lodash';
+import { unzip } from 'lodash';
 
-/** parses a text input as a grid, with elements accessible at grid[y][x] */
-export function parseAsYxGrid( input: string ) {
+/** parses a text input as a grid, with elements accessible at grid[y][x] and the origin in the top-left. */
+function parseAsYxGrid( input: string ) {
     return input.split( '\n' ).map( line => line.split('') );
+}
+
+/**
+ * parses a text input as a grid, with elements accessible at grid[x][y], with [0][0] at the bottom-left of the string representation.
+ * @param elementModifier a function that can be used to modify each element as it is parsed. Useful for converting strings to numbers.
+ */
+export function parseAsXyGrid( input: string, elementModifier: (element: string) => any = e => e ) {
+    return unzip(
+        input.split( '\n' ).map(
+            line => line.split('').map( elementModifier )
+        ).reverse()
+    )
+}
+
+/** rotates a 2D grid clockwise, assuming that positive y is right and positive x is up. Returns a new object */
+export function rotateGridClockwise<T>( grid: T[][] ) {
+    return unzip( grid ).map( row => row.reverse() );
+}
+
+/** rotates a 2D grid counterclockwise, assuming that positive y is right and positive x is up. Returns a new object */
+export function rotateGridCounterclockwise<T>( grid: T[][] ) {
+    return unzip( grid ).reverse();
+}
+
+/** mirrors the x-values of a grid (flips it across a line at y=n). Returns a new object. */
+export function mirrorGridX<T>( grid: T[][] ) {
+    return grid.slice().reverse();
+}
+
+/** mirrors the y-values of a grid (flips it across a line at x=n). Returns a new object. */
+export function mirrorGridY<T>( grid: T[][] ) {
+    return grid.map( row => row.slice().reverse() );
 }
 
 /**
@@ -11,4 +43,57 @@ export function parseAsYxGrid( input: string ) {
  */
 export function flipRowsCols<T>( grid: T[][] ) {
     return unzip( grid );
+}
+
+type MultidimensionalArray<T> = (T | MultidimensionalArray<T>)[];
+
+/**
+ * Returns the indexes of the first occurrence of `needle` in a multidimensional array. If the needle is not found, returns [ -1 ].
+ * Otherwise, returns an array as long as the number of dimensions in the array. I.e. if the needle exists at `haystack[7][5][3]`,
+ * this will return `[ 7, 5, 3 ]
+ */
+export function indexesOf<T>( needle: T, haystack: MultidimensionalArray<T> ): number[] {
+    if ( Array.isArray(haystack[0] as any) ) {
+        // dive deeper into each sub-array
+        for ( let i = 0; i < haystack.length; i++ ) {
+            const indexes = indexesOf( needle, haystack[i] as MultidimensionalArray<T> );
+            if ( indexes[0] !== -1 ) {
+                return [ i, ...indexes ];
+            }
+        }
+        // not found in this sub-array
+        return [ -1 ];
+    } else {
+        // if this is the last dimension, search directly
+        return [ haystack.indexOf(needle) ];
+    }
+}
+
+/**
+ * Returns multidimensional indexes of every occurrence of `needle` in a multidimensional array. For example, if the needle exists
+ * at `haystack[7][5][3]` and `haystack[2][4][8]`, this will return `[ [7, 5, 3], [2, 4, 8] ]`.
+ * Returns `[]` if no occurrence is found.
+ */
+export function indexesOfEvery<T>(
+    needle: T,
+    haystack: MultidimensionalArray<T>,
+    /** for internal use only */
+    currentPosition: number[] = [],
+    /** for internal use only */
+    foundIndexes: number[][] = []
+): number[][] {
+    if ( Array.isArray(haystack[0] as any) ) {
+        // dive deeper into each sub-array
+        for ( let i = 0; i < haystack.length; i++ ) {
+            indexesOfEvery( needle, haystack[i] as MultidimensionalArray<T>, [ ...currentPosition, i ], foundIndexes );
+        }
+        return foundIndexes;
+    } else {
+        // if this is the last dimension, search directly
+        haystack.forEach( (element, i) => {
+            if ( element === needle ) {
+                foundIndexes.push( [ ...currentPosition, i ] );
+            }
+        });
+    }
 }

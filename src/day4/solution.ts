@@ -1,20 +1,20 @@
 import { range } from 'lodash';
 import { outputAnswers } from '../output-answers';
-import { parseAsYxGrid } from '../util/grid';
+import { parseAsXyGrid } from '../util/grid';
 import { readTextFile } from '../util/parse';
 import { XYZ } from '../util/xyz';
 
 function solve( input: string ) {
-    const grid = parseAsYxGrid( input );
+    const grid = parseAsXyGrid( input );
     let count = 0;
-    grid.forEach( (row, y) => {
-        row.forEach( (_, x) => {
+    grid.forEach( (col, x) => {
+        col.forEach( (_, y) => {
             const coord = new XYZ([x, y]);
             // search for 'XMAS' going in all directions from this point
             XYZ.orthogonalDirections2D.concat( XYZ.diagonalDirections2D ).forEach( direction => {
                 if (
                     range( 0, 4 ).every(
-                        scalar => coord.plus( new XYZ(direction).times(scalar) ).valueIn( grid ) === 'XMAS'[scalar]
+                        scalar => coord.plus( direction.times(scalar) ).valueIn( grid ) === 'XMAS'[scalar]
                     )
                 ) {
                     count++;
@@ -27,17 +27,17 @@ function solve( input: string ) {
 }
 
 function solve2( input: string ) {
-    const grid = parseAsYxGrid( input );
+    const grid = parseAsXyGrid( input );
     // a map of XYZ.toString() => number of times that the given XYZ is at the center of a single diagonal 'MAS'
     const centerCounts = new Map<string,number>();
-    grid.forEach( (row, y) => {
-        row.forEach( (_, x) => {
+    grid.forEach( (col, x) => {
+        col.forEach( (_, y) => {
             const coord = new XYZ([x, y]);
             XYZ.diagonalDirections2D.forEach( direction => {
                 if (
                     // check that 'MAS' runs diagonally from this point
                     range( 0, 3 ).every(
-                        scalar => coord.plus( new XYZ(direction).times(scalar) ).valueIn( grid ) === 'MAS'[scalar]
+                        scalar => coord.plus( direction.times(scalar) ).valueIn( grid ) === 'MAS'[scalar]
                     )
                 ) {
                     // increment the count of how many times the 'A' is at the center of a diagonal 'MAS'

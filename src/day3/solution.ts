@@ -1,7 +1,7 @@
 import { sum } from 'lodash';
 import { outputAnswers } from '../output-answers';
 import { product } from '../util/math';
-import { parseIntegers, readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 
 function solve( input: string ) {
     return sum(
@@ -19,14 +19,18 @@ function solve2( input: string ) {
     );
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve2( input ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input-2` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 161,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve2( input ),
+        exptectedExampleSolution: 48,
+        exampleInputPath: `${__dirname}/example-input-2`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

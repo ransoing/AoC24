@@ -1,6 +1,6 @@
 import { curry, sum } from 'lodash';
 import { outputAnswers } from '../output-answers';
-import { parseIntegers, readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 
 function solve( input: string, allowConcat = false ) {
     // parse all integer values from each line of input, so each line is just an array of numbers
@@ -31,14 +31,18 @@ function solve( input: string, allowConcat = false ) {
     );
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve( input, true ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 3749,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve( input, true ),
+        exptectedExampleSolution: 11387,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

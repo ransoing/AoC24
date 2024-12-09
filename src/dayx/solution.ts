@@ -18,16 +18,17 @@ function solve( input: string ) {
     // const grid = parseAsXyGrid( input );
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => null,
-
-    // inputs for part 1
-    readTextFile( `${__dirname}/example-input` ),
-    // readTextFile( `${__dirname}/full-input` ),
-    // inputs for part 2
-    // readTextFile( `${__dirname}/example-input` ),
-    // readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: null, // define this
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => null, // define this
+        exptectedExampleSolution: null, // define this
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

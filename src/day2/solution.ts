@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 import { outputAnswers } from '../output-answers';
-import { parseIntegers, readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 
 function solve( input: string ) {
     const reports = input.split( '\n' ).map( line => parseIntegers(line) );
@@ -37,14 +37,18 @@ function reportIsSafe( report: number[] ) {
     );
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve2( input ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 2,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve2( input ),
+        exptectedExampleSolution: 4,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

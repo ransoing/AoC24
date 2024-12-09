@@ -1,7 +1,6 @@
 import { range } from 'lodash';
 import { outputAnswers } from '../output-answers';
 import { parseAsXyGrid } from '../util/grid';
-import { readTextFile } from '../util/parse';
 import { XYZ } from '../util/xyz';
 
 function solve( input: string ) {
@@ -52,14 +51,18 @@ function solve2( input: string ) {
     return Array.from( centerCounts.values() ).filter( count => count === 2 ).length;
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve2( input ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 18,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve2( input ),
+        exptectedExampleSolution: 9,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

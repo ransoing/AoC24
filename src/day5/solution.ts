@@ -1,5 +1,5 @@
 import { outputAnswers } from '../output-answers';
-import { parseIntegers, readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 
 function solve( input: string, solvePart2 = false ) {
     const blocks = input.split( '\n\n' ).map(
@@ -33,14 +33,18 @@ function solve( input: string, solvePart2 = false ) {
     return solvePart2 ? sums.incorrectlyOrdered : sums.correctlyOrdered;
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve( input, true ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 143,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve( input, true ),
+        exptectedExampleSolution: 123,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

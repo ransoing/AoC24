@@ -1,6 +1,5 @@
 import { outputAnswers } from '../output-answers';
 import { indexesOfEvery, parseAsXyGrid } from '../util/grid';
-import { readTextFile } from '../util/parse';
 import { XYZ } from '../util/xyz';
 
 function solve( input: string, solvePart2 = false ) {
@@ -53,14 +52,18 @@ function solve( input: string, solvePart2 = false ) {
     return antinodeLocations.size;
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve( input, true ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 14,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve( input, true ),
+        exptectedExampleSolution: 34,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

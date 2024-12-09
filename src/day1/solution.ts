@@ -1,6 +1,6 @@
 import { sum } from 'lodash';
 import { outputAnswers } from '../output-answers';
-import { parseIntegers, readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 
 function solve( input: string, part2 = false ) {
     const grid = input.split( '\n' ).map( line => parseIntegers(line) );
@@ -18,14 +18,18 @@ function solve( input: string, part2 = false ) {
         )
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve( input, true ),
 
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 11,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve( input, true ),
+        exptectedExampleSolution: 31,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

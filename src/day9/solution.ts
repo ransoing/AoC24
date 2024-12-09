@@ -1,6 +1,5 @@
 import { range, sum } from 'lodash';
 import { outputAnswers } from '../output-answers';
-import { readTextFile } from '../util/parse';
 
 function solve( input: string ) {
     // store the disk as an array of numbers, where each element represents the file ID of that block (or `null` if empty)
@@ -53,16 +52,17 @@ function solve2( input ) {
     );
 }
 
-outputAnswers(
-    // function that solves part 1
-    ( input: string ) => solve( input ),
-    // function that solves part 2
-    ( input: string ) => solve2( input ),
-
-    // inputs for part 1
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` ),
-    // inputs for part 2
-    readTextFile( `${__dirname}/example-input` ),
-    readTextFile( `${__dirname}/full-input` )
-);
+outputAnswers({
+    part1: {
+        solver: ( input: string ) => solve( input ),
+        exptectedExampleSolution: 1928,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    },
+    part2: {
+        solver: ( input: string ) => solve2( input ),
+        exptectedExampleSolution: 2858,
+        exampleInputPath: `${__dirname}/example-input`,
+        fullInputPath: `${__dirname}/full-input`
+    }
+});

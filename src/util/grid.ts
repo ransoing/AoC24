@@ -87,7 +87,6 @@ export function indexesOfEvery<T>(
         for ( let i = 0; i < haystack.length; i++ ) {
             indexesOfEvery( needle, haystack[i] as MultidimensionalArray<T>, [ ...currentPosition, i ], foundIndexes );
         }
-        return foundIndexes;
     } else {
         // if this is the last dimension, search directly
         haystack.forEach( (element, i) => {
@@ -96,4 +95,5 @@ export function indexesOfEvery<T>(
             }
         });
     }
+    return foundIndexes;
 }

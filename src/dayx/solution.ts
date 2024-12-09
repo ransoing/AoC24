@@ -24,8 +24,10 @@ outputAnswers(
     // function that solves part 2
     ( input: string ) => null,
 
+    // inputs for part 1
     readTextFile( `${__dirname}/example-input` ),
     // readTextFile( `${__dirname}/full-input` ),
+    // inputs for part 2
     // readTextFile( `${__dirname}/example-input` ),
     // readTextFile( `${__dirname}/full-input` )
 );

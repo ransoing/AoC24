@@ -4,7 +4,7 @@ import { outputAnswers } from '../output-answers';
 import { parseAsXyGrid } from '../util/grid';
 import { product } from '../util/math';
 import { countDiffs } from '../util/misc';
-import { readTextFile } from '../util/parse';
+import { parseIntegers } from '../util/parse';
 import { Range } from '../util/range';
 import { Range2D } from '../util/range2d';
 import { Range3D } from '../util/range3d';
@@ -27,7 +27,7 @@ outputAnswers({
     },
     part2: {
         solver: ( input: string ) => null, // define this
-        exptectedExampleSolution: null, // define this
+        exptectedExampleSolution: null, // define this. Use NO_EXPECTED_EXAMPLE_SOLUTION if there is no example solution provided
         exampleInputPath: `${__dirname}/example-input`,
         fullInputPath: `${__dirname}/full-input`
     }

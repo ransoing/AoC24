@@ -45,6 +45,32 @@ export function flipRowsCols<T>( grid: T[][] ) {
     return unzip( grid );
 }
 
+/** prints the grid to console */
+export function displayGrid<T>( grid: T[][] ) {
+    grid.forEach( row => {
+        console.log( row.join('') );
+    });
+}
+
+/** runs a callback function for each element in a 2D grid */
+export function forEachInGrid<T>( grid: T[][], callback: (element: T, x: number, y: number) => void ) {
+    grid.forEach( (col, x) => {
+        col.forEach( (element, y) => {
+            callback( element, x, y );
+        });
+    });
+}
+
+/** replaces each item in a 2D grid with the return value of `callback`. Returns the modified grid. */
+export function replaceEachInGrid<T>( grid: T[][], callback: (element: any, x?: number, y?: number) => any ) {
+    grid.forEach( (col, x) => {
+        col.forEach( (element, y) => {
+            grid[x][y] = callback( element, x, y );
+        });
+    });
+    return grid;
+}
+
 type MultidimensionalArray<T> = (T | MultidimensionalArray<T>)[];
 
 /**

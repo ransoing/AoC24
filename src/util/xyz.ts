@@ -265,9 +265,13 @@ export class XYZ {
     }
 
     /** alias of `rotatedClockwise` */
-    rotatedClockwiseXY = this.rotatedClockwise;
+    rotatedClockwiseXY() {
+        return this.rotatedClockwise();
+    }
     /** alias of `rotatedCounterClockwise` */
-    rotatedCounterClockwiseXY = this.rotatedCounterClockwise;
+    rotatedCounterClockwiseXY() {
+        return this.rotatedCounterClockwise();
+    }
 
     /**
      * rotates the XYZ as a vector clockwise and returns a new XYZ, from a point of view of a higher y-value looking down on the XZ plane.

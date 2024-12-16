@@ -1,4 +1,5 @@
 import { sum } from 'lodash';
+import { exit } from 'process';
 
 export type Coordinate = XYZ | number[];
 
@@ -71,22 +72,30 @@ export interface IPathfindingOptions {
      * For something more complicated, like if there are restrictions on where the traveler can go from the given point based on other
      * criteria, return a string that describes the point and the directions or places that the traveler can go from there. Always use the
      * least possible amount of info to describe the state.
+     * The last item in `history` is the same as `p`.
      * @default p => p.toString()
      */
     getStateKey?: (p: XYZ, history?: IPathHistoryItem[]) => string;
     /**
      * Gets the "weight" i.e. cost, to travel from one point to a neighboring point. Higher weights are considered to be "worse".
-     * Default: p => 1
+     * `history` does NOT include the `to` point, since it hasn't been traveled to yet.
+     * @default p => 1
      */
-    getPointWeight?: (to: XYZ, from?: XYZ) => number;
+    getPointWeight?: (to: XYZ, history?: IPathHistoryItem[]) => number;
     /**
      * An estimated average weight it takes to travel from any one point to a neighboring point. Used to help stop paths early when one path
      * has gotten to the finish point. Conservative lower numbers will produce a more accurate end result but run slower.
      * Another way to think about this is: given a path that has gotten halfway, what's the lowest possible additional weight it could
      * accumulate on the way to the finish?
-     * Default: 1
+     * @default 1
      */
     averageWeight?: number;
+    /**
+     * Runs when a path is abandoned because it has reached a state that another path has already reached with the same accumulated weight.
+     * This is called with the history and weight of the path that was abandoned.
+     * @default () => {}
+    */
+    onSnubEqualWeightedPath?: (snubbedPathHistory?: IPathHistoryItem[], totalWeight?: number) => void;
 }
 
 export interface IFloodFillResult {
@@ -396,7 +405,8 @@ export class XYZ {
             tap: () => {},
             getPointWeight: p => 1,
             averageWeight: 1,
-            getStateKey: p => p.toString()
+            getStateKey: p => p.toString(),
+            onSnubEqualWeightedPath: () => {}
         };
         const o = Object.assign( {}, defaultOptions, options );
         /** a map of string representations of points that have been visited and the lowest total weight any path has accumulated to get there */
@@ -442,14 +452,15 @@ export class XYZ {
             }
 
             // check the history of this path to see if another path has gotten to any of its former states faster
-            let shouldContinue = false;
+            // @TODO this might be faster if we trim paths at the point when another path visits a point in this path's history
+            let shouldAbort = false;
             for ( let j = 0; j < current.history.length; j++ ) {
                 if ( lowestWeightsToPoint.get(current.history[j].stateKey) + o.fudgeFactor < current.history[j].accumulatedWeight ) {
-                    shouldContinue = true;
+                    shouldAbort = true;
                     break;
                 }
             }
-            if ( shouldContinue ) {
+            if ( shouldAbort ) {
                 continue;
             }
 
@@ -458,7 +469,7 @@ export class XYZ {
                 if ( !o.canVisitNeighbor(n, current.point, current.history) ) {
                     return;
                 }
-                const totalWeightToTravel = current.accumulatedWeight + o.getPointWeight( n, current.point );
+                const totalWeightToTravel = current.accumulatedWeight + o.getPointWeight( n, current.history );
                 const newHistoryItem: IPathHistoryItem = {
                     accumulatedWeight: totalWeightToTravel,
                     point: n,
@@ -469,11 +480,14 @@ export class XYZ {
                 newHistoryItem.stateKey = stateKey;
                 
                 const lowestWeightToNeighbor = lowestWeightsToPoint.get( stateKey ) ?? Number.MAX_VALUE;
-                // don't travel if this point has already been visited and we're not allowed to revisit
+                // don't travel if this state has already been visited and we're not allowed to revisit
                 if (
                     lowestWeightToNeighbor != null &&
                     totalWeightToTravel >= lowestWeightToNeighbor + o.fudgeFactor
                 ) {
+                    if ( totalWeightToTravel === lowestWeightToNeighbor ) {
+                        o.onSnubEqualWeightedPath( pastPlusN, totalWeightToTravel );
+                    }
                     return;
                 }
 

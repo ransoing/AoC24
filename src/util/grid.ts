@@ -47,7 +47,7 @@ export function flipRowsCols<T>( grid: T[][] ) {
 
 /** prints the grid to console */
 export function displayGrid<T>( grid: T[][] ) {
-    grid.forEach( row => {
+    rotateGridCounterclockwise( grid ).forEach( row => {
         console.log( row.join('') );
     });
 }

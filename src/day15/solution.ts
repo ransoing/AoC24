@@ -89,14 +89,14 @@ function solve( input: string, part2 = false ) {
     }
 
     // attempts to move a box in the specified direction. returns whether the box moved.
-    function moveWideBox( box: XYZ, dir: XYZ ): boolean {
+    function moveWideBox( box: XYZ, dir: XYZ, checkIfCanMove = true ): boolean {
         // if this box can move, move the box(es) in the way first, then move this box
-        if ( dir.y === 0 && canMoveWideBoxX(box, dir) ) {
-            getCollidingBoxX( box, dir ).forEach( b => moveWideBox(b, dir) );
+        if ( dir.y === 0 && (!checkIfCanMove || canMoveWideBoxX(box, dir)) ) {
+            getCollidingBoxX( box, dir ).forEach( b => moveWideBox(b, dir, false) );
             box.add( dir );
             return true;
-        } else if ( dir.x === 0 && canMoveWideBoxY(box, dir) ) {
-            getCollidingBoxesY( box, dir ).forEach( b => moveWideBox(b, dir) );
+        } else if ( dir.x === 0 && (!checkIfCanMove || canMoveWideBoxY(box, dir)) ) {
+            getCollidingBoxesY( box, dir ).forEach( b => moveWideBox(b, dir, false) );
             box.add( dir );
             return true;
         }

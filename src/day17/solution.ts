@@ -25,7 +25,7 @@ function solve( input: string ) {
  * are dependent only on the value of register A of previous loops - i.e. at the beginning of each loop, the previous values of
  * B and C can be ignored.
  */
-function runOneLoop( program: number[], aValue: number ): { output: number, newAValue: number} {
+function runOneLoop( program: number[], aValue: number ): { output: number, newAValue: number } {
     let index = 0;
     const registers = [ aValue, 0, 0 ];
     let output: number;

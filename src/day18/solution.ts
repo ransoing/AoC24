@@ -1,7 +1,7 @@
 import { outputAnswers } from '../output-answers';
 import { parseIntegers } from '../util/parse';
 import { XYZ } from '../util/xyz';
-import { insertIndexBinary } from '../util/search';
+import { findInsertIndexBinary } from '../util/search';
 
 function solve( input: string, part2 = false ) {
     let coords: XYZ[] = input.split( '\n' ).map( l => new XYZ(parseIntegers(l)) );
@@ -15,10 +15,11 @@ function solve( input: string, part2 = false ) {
         const walls = new Set( coords.slice( 0, coords.length < 100 ? 12 : 1024 ).map(c => c.toString()) );
         return getShortestPath( maxX, maxY, walls ).history.length;
     } else {
-        // run a binary search to find the first coordinate that causes no valid path
-        const thresholdIndex = insertIndexBinary( coords, (coord, i) => {
-            // search lower if there is no valid path, higher if there is a valid path
+        // run a binary search to find the first coordinate that causes no valid path when it and all the coordinates before it are
+        // treated as walls
+        const thresholdIndex = findInsertIndexBinary( coords, (coord, i) => {
             const walls = new Set( coords.slice(0, i + 1).map(c => c.toString()) );
+            // search lower if there is no valid path, higher if there is a valid path
             return getShortestPath( maxX, maxY, walls ).history.length === 0 ? -1 : 1;
         });
         return `${coords[thresholdIndex].x},${coords[thresholdIndex].y}`;

@@ -8,21 +8,12 @@ function solve( input: string, maxCheatLength: number, testMinSavings: number ) 
     const minSavings = grid.length > 20 ? 100 : testMinSavings;
     // get S and E
     const [ start, end ] = [ 'S', 'E' ].map( letter => new XYZ( indexesOf(letter, grid) ) );
-    [ start, end ].forEach( point => point.setValueIn(grid, '.') );
 
-    // for each point in the maze, record how many steps it takes to get to the point, and how many it takes to get from there to the end
-    const distances = new Map<string, { toPoint: number, toEnd: number }>();
     const quickest = start.quickestPath({
         target: end,
-        canVisitNeighbor: n => n.valueIn( grid ) === '.'
+        canVisitNeighbor: n => [ 'E', '.' ].includes( n.valueIn(grid) )
     });
     const path = [ start, ...quickest.history.map(p => p.point) ];
-    path.forEach( (point, i) => {
-        distances.set( point.toString(), {
-            toPoint: i,
-            toEnd: path.length - i
-        });
-    });
 
     let numGoodCheats = 0; // the number of cheats that save us at least `testMinSavings` steps
     // for each spot on the path, find other spots farther down the path that can be gotten to within the max cheat length and discover the
@@ -32,12 +23,10 @@ function solve( input: string, maxCheatLength: number, testMinSavings: number ) 
         // save that many steps
         for ( let j = i + minSavings; j < path.length; j++ ) {
             const taxiDistance = path[j].taxicabDistanceTo( path[i] );
-            if ( taxiDistance <= maxCheatLength ) {
-                // calculate the savings from the cheat
-                const totalDistanceWithCheat = distances.get(path[i].toString()).toPoint + distances.get(path[j].toString()).toEnd + taxiDistance;
-                if ( path.length - totalDistanceWithCheat >= minSavings ) {
-                    numGoodCheats++;
-                }
+            // check that we're not cheating too far, and that the cheat saves us enough steps.
+            // The amount of savings can be counted using the total amount of indexes on the path we skipped, and the cheat distance
+            if ( taxiDistance <= maxCheatLength && j - i - taxiDistance >= minSavings ) {
+                numGoodCheats++;
             }
         }
     }
@@ -48,13 +37,13 @@ function solve( input: string, maxCheatLength: number, testMinSavings: number ) 
 outputAnswers({
     part1: {
         solver: ( input: string ) => solve( input, 2, 12 ),
-        exptectedExampleSolution: 8,
+        exptectedExampleSolution: 8, // 8 cheats that save us at least 12 steps
         exampleInputPath: `${__dirname}/example-input`,
         fullInputPath: `${__dirname}/full-input`
     },
     part2: {
         solver: ( input: string ) => solve( input, 20, 74 ),
-        exptectedExampleSolution: 7,
+        exptectedExampleSolution: 7, // 7 cheats that save us at least 74 steps
         exampleInputPath: `${__dirname}/example-input`,
         fullInputPath: `${__dirname}/full-input`
     }

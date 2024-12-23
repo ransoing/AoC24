@@ -8,6 +8,7 @@ import { parseIntegers } from '../util/parse';
 import { Range } from '../util/range';
 import { Range2D } from '../util/range2d';
 import { Range3D } from '../util/range3d';
+import { findInsertIndexBinary } from '../util/search';
 import { XYZ } from '../util/xyz';
 const areaOfPolygon = require( 'area-polygon' );
 
